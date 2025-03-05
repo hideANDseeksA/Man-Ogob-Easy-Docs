@@ -104,7 +104,7 @@ const Transaction = () => {
                       <td className="border p-3">{new Date(transaction.date_requested).toLocaleDateString()}</td>
                       <td className="border p-3">{transaction.status}</td>
                       <td className="border p-3">{transaction.date_issued ? new Date(transaction.date_issued).toLocaleDateString() : "To be scheduled"}</td>
-                      <td className="border p-3">{transaction.purpose}</td>
+                      <td className="border p-3">{transaction.certificate_details.purpose}</td>
                     </tr>
                   ))}
                 </tbody>

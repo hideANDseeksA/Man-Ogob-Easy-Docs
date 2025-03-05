@@ -7,6 +7,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate(); // Hook for navigation
 
+
   if (!isOpen) return null;
 
   const handleResetPassword = async () => {
@@ -34,7 +35,20 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate("/verification", { state: { email: email, mode:'forgotpassword'} });
+        const code = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit verification code
+        try {
+          await fetch("https://bned-backend.onrender.com/user/update_code", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, code }),
+          });
+          navigate("/verification", { state: { email: email,code:code, mode:'forgotpassword'} });
+        } catch (error) {
+          console.error("Error resending OTP:", error);
+          alert('Failed to resend OTP. Please try again later.');
+        }
+       
+       
       } else {
         setError(data.error || "Something went wrong");
       }
@@ -44,6 +58,9 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     setLoading(false); // Stop loading
   };
+
+
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

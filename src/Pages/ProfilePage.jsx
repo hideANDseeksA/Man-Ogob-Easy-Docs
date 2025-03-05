@@ -41,7 +41,12 @@ const ProfilePage = () => {
     }
   };
 
-  const handleCancelTransaction = async (transaction_id) => {
+  const handleCancelTransaction = async (transaction_id, status) => {
+    if (status !== 'Pending') {
+      Swal.fire('Warning!', 'Only pending transactions can be cancelled.', 'warning');
+      return;
+    }
+
     Swal.fire({
       title: 'Are you sure?',
       text: "You want to cancel this transaction?",
@@ -83,26 +88,28 @@ const ProfilePage = () => {
             </div>
 
             {/* Announcement content */}
-            <div className="mt-5  md:text-lg text-base">
-              <h2 className="font-semibold mb-3 text-center">Certification &amp; Services Processing</h2>
-              <p className='text-justify'> 
-                Good day, residents of Barangay San Isidro! We are now processing your certification requests as well as other services. Please take note of the following details:
+            <div className="mt-6 md:text-lg text-base text-gray-800">
+              <h2 className="font-bold text-xl mb-4 text-center text-gray-900">Certification &amp; Services Processing</h2>
+              <p className="text-justify leading-relaxed">
+                Greetings to all residents of Barangay Man-Ogob. We are pleased to inform you that we are now processing certification requests and other essential services. Kindly take note of the following details:
               </p>
-              <ul className="list-disc mx-auto max-w-md " >
+              <ul className="list-disc mx-auto max-w-md mt-4 pl-5 space-y-2">
                 <li><strong>Processing Schedule:</strong> Monday to Friday, 8:00 AM - 4:00 PM</li>
-                <li><strong>Location:</strong> Barangay Hall, San Isidro</li>
+                <li><strong>Location:</strong> Barangay Hall, Man-Ogob</li>
                 <li>
-                  <strong>Requirements:</strong> Valid ID, completed application form, and any supporting documents as needed.
+                  <strong>Required Documents:</strong> A valid government-issued ID, a duly accomplished application form, and any supporting documents as necessary.
                 </li>
                 <li>
-                  <strong>Inquiries:</strong> Contact us at (123) 456-7890 or email <a href="mailto:info@barangaysanisidro.gov.ph" className="underline">info@barangaysanisidro.gov.ph</a>
+                  <strong>For Inquiries:</strong> Please contact us at (123) 456-7890 or email us at <a href="mailto:info@barangaymanogob.gov.ph" className="underline text-blue-600 hover:text-blue-800">info@barangaymanogob.gov.ph</a>.
                 </li>
               </ul>
-              <p className="mt-3">
-                Please follow the health and safety protocols during your visit. We appreciate your cooperation and look forward to serving you.
+              <p className="mt-5 leading-relaxed">
+                We kindly request all visitors to observe health and safety protocols while within the premises. Your cooperation is highly valued, and we look forward to serving you.
               </p>
-              <p className="mt-3 font-bold">Barangay San Isidro, [Current Year]</p>
+              <p className="mt-5 font-semibold text-gray-900">Barangay Man-Ogob, 2025</p>
             </div>
+
+
           </div>
 
         </div>
@@ -138,7 +145,7 @@ const ProfilePage = () => {
                     }`}
                 >
                   <div className="mt-3 p-3 border-t">
-                    <p>Purpose: {transaction.purpose}</p>
+                    <p>Note: You can cancel your request if the status is pending</p>
                     {transaction.status !== "claimable" && (
                       <button
                         className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition-all duration-300"
