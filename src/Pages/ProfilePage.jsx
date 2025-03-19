@@ -149,7 +149,7 @@ const ProfilePage = () => {
                     {transaction.status !== "claimable" && (
                       <button
                         className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition-all duration-300"
-                        onClick={() => handleCancelTransaction(transaction.transaction_id)}
+                        onClick={() => handleCancelTransaction(transaction.transaction_id,transaction.status)}
                       >
                         Cancel
                       </button>
