@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -71,8 +71,33 @@ const SignInPage = () => {
 
   const openForgotPasswordModal = () => setIsForgotPasswordModalOpen(true);
   const closeForgotPasswordModal = () => setIsForgotPasswordModalOpen(false);
+  const vantaRef = useRef(null);
+
+  useEffect(() => {
+    // Ensure VANTA is available globally
+    if (window.VANTA) {
+      const effect = window.VANTA.BIRDS({
+        el: vantaRef.current,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.0,
+        minWidth: 200.0,
+        scale: 1.0,
+        scaleMobile: 1.0,
+        backgroundColor: 0xffffff,
+        color1: 0x000000,
+        color2: 0x48e81
+      });
+
+      return () => {
+        if (effect) effect.destroy(); // Cleanup on unmount
+      };
+    }
+  }, []);
 
   return (
+    
     <>
       {loading && <LoadingScreen />} {/* Show loading overlay when processing */}
 
@@ -81,10 +106,9 @@ const SignInPage = () => {
         isOpen={isForgotPasswordModalOpen}
         onClose={closeForgotPasswordModal}
       />
+        <div ref={vantaRef} className="absolute top-0 left-0 w-full h-full -z-10"></div>
       <div className='flex w-[100%] h-screen items-center justify-center'>
         <div className='w-[50%] h-[100%] hidden md:block'></div>
-
-
         <div className='md:w-[50%] w-[100%] h-[100%] md:px-0 px-9'>
           <div className='md:pr-28 md:left-0'>
             <div className=''>

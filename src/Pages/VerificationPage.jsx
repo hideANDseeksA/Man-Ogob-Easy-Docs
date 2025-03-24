@@ -59,7 +59,7 @@ const OTPVerification = () => {
       });
 
       const newCode = Math.floor(100000 + Math.random() * 900000); // Generate a new 6-digit code
-      await axios.put("https://bned-backend.onrender.com/user/update_code", { email, code: newCode });
+      await axios.put("http://localhost:3000/user/update_code", { email, code: newCode });
       setOtp(["", "", "", "", "", ""]);
       setTimer(60);
       setCanResend(false);
@@ -92,7 +92,7 @@ const OTPVerification = () => {
           }
         });
 
-        const response = await axios.put("https://bned-backend.onrender.com/user/update_verification", { email, verified: true });
+        const response = await axios.put("http://localhost:3000/user/update_verification", { email, verified: true });
         console.log("Verification successful:", response.data);
         Swal.fire({
           icon: 'success',

@@ -31,7 +31,7 @@ if (!user) {
         <div className="md:flex md:flex-row gap-3 md:gap-5 flex flex-col justify-center items-center">
           <img className="h-[80px] w-auto" src="./images/logo.png" alt="logo" />
           <div className="flex flex-col justify-center items-center md:place-items-start">
-            <h2 className="font-semibold">{user.first_name} {user.middle_name ? user.middle_name + ' ' : ''}{user.last_name}</h2>
+            <h2 className="font-semibold">  Hello,  {user.first_name}</h2>
             <p>{user.email}</p>
           </div>
         </div>

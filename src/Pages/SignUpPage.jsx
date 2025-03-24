@@ -47,29 +47,37 @@ const SignUpPage = () => {
     });
 
     try {
-      const response = await axios.post('https://bned-backend.onrender.com/api/create_user', {
-        user_id: formData.user_id,
-        email: formData.email,
-        password: formData.password,
-        code: code,
-      });
-
-      if (response.status === 201) {
+        const response = await axios.post('https://bned-backend.onrender.com/api/create_user', {
+          user_id: formData.user_id,
+          email: formData.email,
+          password: formData.password,
+          code: code,
+        });
+      
+        if (response.status === 201) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: response.data.message, // ✅ Show API message
+          }).then(() => {
+            navigate("/verification", { state: { email: formData.email, code: code } });
+          });
+        }
+      } catch (error) {
+        let errorMessage = "Failed to create user. Please try again later.";
+      
+        // ✅ Check if API responded with an error message
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      
         Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'User added successfully. Verification code sent.',
-        }).then(() => {
-          navigate("/verification", { state: { email: formData.email, code: code } });
+          icon: 'error',
+          title: 'Error',
+          text: errorMessage, // ✅ Show exact API message
         });
       }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to create user. Please try again later.',
-      });
-    }
+      
   };
 
   return (
@@ -167,3 +175,51 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
+// import React, { useState } from "react";
+// import axios from "axios";
+
+// const CreateUserForm = () => {
+//   const [formData, setFormData] = useState({
+//     student_id: "",
+//     email: "",
+//     password: "",
+//   });
+
+//   const [message, setMessage] = useState("");
+
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     const verificationCode = Math.floor(100000 + Math.random() * 900000); // 6-digit code
+
+//     try {
+//       const response = await axios.post("http://localhost:8000/api/create_user", {
+//         ...formData,
+//         student_id: parseInt(formData.student_id, 10),
+//         code: verificationCode,
+//       });
+
+//       setMessage(response.data.message);
+//     } catch (error) {
+//       setMessage("Failed to create user.");
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <h2>Create User</h2>
+//       <form onSubmit={handleSubmit}>
+//         <input type="number" name="student_id" placeholder="Student ID" value={formData.student_id} onChange={handleChange} required />
+//         <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+//         <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
+//         <button type="submit">Create Account</button>
+//       </form>
+//       {message && <p>{message}</p>}
+//     </div>
+//   );
+// };
+
+// export default CreateUserForm;

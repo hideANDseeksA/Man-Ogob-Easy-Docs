@@ -30,7 +30,7 @@ const ResetPassword = () => {
     });
 
     try {
-      const response = await axios.put("https://bned-backend.onrender.com/user/update_password", {
+      const response = await axios.put("http://localhost:3000/user/update_password", {
         email,
         password: newPassword,
       });
