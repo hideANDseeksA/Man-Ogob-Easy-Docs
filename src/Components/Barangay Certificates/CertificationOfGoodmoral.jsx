@@ -4,7 +4,10 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const BarangayClearance = ({ title, content }) => {
+const CertificationOfGoodMoral = ({ title, content }) => {
+  const apiUrl = import.meta.env.VITE_API_REQUEST;
+  const headerName = import.meta.env.VITE_HEADER_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
   const [isOpen, setIsOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selected, setSelected] = useState(location.pathname);
@@ -13,9 +16,18 @@ const BarangayClearance = ({ title, content }) => {
     fullName: "",
     age: "",
     purok: "",
-    maritalStatus: "",
     purpose: "",
+    message: ""
   });
+  const resetForm = () => {
+    setFormData({
+      fullName: "",
+      age: "",
+      purok: "",
+      purpose: "",
+      message: ""
+    })
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,6 +49,18 @@ const BarangayClearance = ({ title, content }) => {
       });
       return;
     }
+      if (!navigator.onLine) {
+          Swal.fire({
+            icon: 'error',
+            title: 'No Internet',
+            text: 'You are currently offline. Please check your connection.',
+            toast: true,
+            timer: 3000,
+            position: 'top-end',
+            showConfirmButton: false,
+          });
+          return;
+        }
 
     // Show confirmation dialog before submitting
     Swal.fire({
@@ -73,18 +97,24 @@ const BarangayClearance = ({ title, content }) => {
         });
 
         try {
-          const response = await axios.post("https://bned-backend.onrender.com/certificate_transaction", {
-            resident_id: user.resident_id, 
-            certificate_type: "Barangay Indigency",
+          await axios.post(apiUrl, {
+            resident_id: user.resident_id,
+            email: user.email,
+            certificate_type: "Certification of Good Moral",
             status: "Pending",
             certificate_details: {
-              template:"indigency",
+              template: "goodmoral",
               fullName: formData.fullName,
               age: formData.age,
               purok: formData.purok,
-              maritalStatus: formData.maritalStatus,
               purpose: formData.purpose,
+              message: formData.message
             },
+          }, {
+            headers: {
+
+             [headerName]:apiKey
+            }
           });
 
           Swal.fire({
@@ -102,6 +132,7 @@ const BarangayClearance = ({ title, content }) => {
               confirmButton: "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded",
             },
           });
+          resetForm();
           setIsFormOpen(false);
         } catch (error) {
           console.error("Error submitting request:", error);
@@ -167,7 +198,7 @@ const BarangayClearance = ({ title, content }) => {
             transition={{ duration: 0.3 }}
             className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md"
           >
-            <h2 className="text-xl font-bold mb-4">Request Barangay Certificate</h2>
+            <h2 className="text-xl font-bold mb-4">Request Certificate Of Good Moral </h2>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium">Full Name</label>
@@ -178,59 +209,49 @@ const BarangayClearance = ({ title, content }) => {
                   placeholder="Enter your full name"
                   required
                   value={formData.fullName}
-                  onChange={handleChange}
-                  onInput={(e) => {
-                    // Prevent multiple spaces and leading spaces
-                    e.target.value = e.target.value.replace(/^\s+|\s{2,}/g, " ");
 
-                    // Ensure only one dot (.)
-                    const dotCount = e.target.value.split('.').length - 1;
-                    if (dotCount > 1) {
-                      e.target.value = e.target.value.slice(0, -1); // Remove extra dots
-                    }
+                  onChange={(e) => {
+                    setFormData({ ...formData, fullName: e.target.value.toUpperCase() });
                   }}
-                  onKeyDown={(e) => {
-                    const isLetter = /^[A-Za-z]$/.test(e.key);
-                    const isAllowedKey = ["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete", " "].includes(e.key);
 
-                    if (e.key === ".") {
-                      // Allow dot only if it's the first occurrence
-                      if (e.target.value.includes(".")) {
-                        e.preventDefault();
-                      }
-                    } else if (!isLetter && !isAllowedKey) {
-                      e.preventDefault(); // Block numbers and special characters
-                    }
-                  }}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium">Age</label>
                 <input
-                  type="number"
+                  type="text"
                   name="age"
                   className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your age"
-                  min="1"
-                  max="99"
                   value={formData.age}
                   onChange={handleChange}
                   required
+                  maxLength={3} // Restrict to 3 characters
                   onInput={(e) => {
-                    if (e.target.value.length > 2) {
-                      e.target.value = e.target.value.slice(0, 2); // Ensure max 2 digits
+                    // Allow only numeric characters and enforce 3 digits max
+                    let value = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+
+                    if (value.length > 3) {
+                      value = value.slice(0, 3); // Limit the length to 3 digits
                     }
+
+                    if (value && value[0] !== "1") {
+                      value = value.slice(0, 2); // Limit the length to 3 digits
+                    }
+
+                    e.target.value = value;
                   }}
                   onKeyDown={(e) => {
-                    // Allow only numbers (0-9), Backspace, Tab, and Arrow keys
+                    // Block any non-numeric key press (except Backspace, Arrow keys, etc.)
                     if (!/^[0-9]$/.test(e.key) &&
                       !["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete"].includes(e.key)) {
-                      e.preventDefault(); // ❌ Block all other keys (including special characters)
+                      e.preventDefault();
                     }
                   }}
                 />
+
               </div>
-         
+
               <div>
                 <label className="block text-sm font-medium">Purok</label>
                 <select
@@ -246,23 +267,14 @@ const BarangayClearance = ({ title, content }) => {
                   <option value="Purok 3">Purok 3</option>
                   <option value="Purok 4">Purok 4</option>
                   <option value="Purok 5">Purok 5</option>
-                  <option value="Purok 6">Purok 6</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Marital Status</label>
-                <select
-                  name="maritalStatus"
-                  className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.maritalStatus}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select marital status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Widowed">Widowed</option>
-                  <option value="Divorced">Divorced</option>
+                  <option value="Purok 6 A">Purok 6-A</option>
+                  <option value="Purok 6 B">Purok 6-B</option>
+                  <option value="Purok 7 A">Purok 7-A</option>
+                  <option value="Purok 7 B">Purok 7-B</option>
+                  <option value="Purok 8 A">Purok 8-A</option>
+                  <option value="Purok 8 B">Purok 8-B</option>
+                  <option value="Purok 9">Purok 9</option>
+                  <option value="Purok 10">Purok 10</option>
                 </select>
               </div>
               <div>
@@ -273,8 +285,29 @@ const BarangayClearance = ({ title, content }) => {
                   className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter purpose"
                   value={formData.purpose}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    let { name, value } = e.target;
+
+                    // Capitalize the first letter after a space
+                    value = value
+                      .toLowerCase()
+                      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+                    setFormData({ ...formData, [name]: value });
+                  }}
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Message </label>
+                <textarea
+                  name="message"
+                  className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter additional explanation or message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={3} // You can adjust the number of rows as needed
+                  required // Optional if you want it to be mandatory
                 />
               </div>
               <div className="flex justify-end gap-3">
@@ -300,5 +333,5 @@ const BarangayClearance = ({ title, content }) => {
   );
 };
 
-export default BarangayClearance;
+export default CertificationOfGoodMoral;
 

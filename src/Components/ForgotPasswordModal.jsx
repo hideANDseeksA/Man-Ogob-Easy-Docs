@@ -35,20 +35,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
       const data = await response.json();
 
       if (response.ok) {
-        const code = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit verification code
-        try {
-          await fetch("https://bned-backend.onrender.com/user/update_code", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, code }),
-          });
-          navigate("/verification", { state: { email: email,code:code, mode:'forgotpassword'} });
-        } catch (error) {
-          console.error("Error resending OTP:", error);
-          alert('Failed to resend OTP. Please try again later.');
-        }
-       
-       
+          navigate("/verification", { state: { email: email, mode:'forgot_password'} });
       } else {
         setError(data.error || "Something went wrong");
       }

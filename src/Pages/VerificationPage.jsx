@@ -7,14 +7,83 @@ const OTPVerification = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || ""; // Retrieve email from state
-  const code1 = location.state?.code || "";
   const mode = location.state?.mode ||"" ;
-
+  const bt = location.state?.bt ||"" ;
+  const[buttonName,setbuttonName]=useState("Resend Otp");
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const headerName = import.meta.env.VITE_HEADER_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(0);
   const [canResend, setCanResend] = useState(false);
-  const [code, setCode] = useState(Math.floor(100000 + Math.random() * 900000)); // Store code in state
   const inputRefs = useRef([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      Swal.fire({
+        icon: "success",
+        title: "Back Online",
+        toast: true,
+        timer: 3000,
+        position: "top-end",
+        showConfirmButton: false,
+      });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      Swal.fire({
+        icon: "error",
+        title: "No Internet Connection",
+        text: "Please check your network connection.",
+        toast: true,
+        timer: 3000,
+        position: "top-end",
+        showConfirmButton: false,
+      });
+    };
+
+    const checkPoorConnection = () => {
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (connection) {
+        const { effectiveType, downlink, rtt } = connection;
+        const isSlowConnection = effectiveType.includes("2g") || rtt > 500 || downlink < 0.5;
+
+        if (isSlowConnection) {
+          Swal.fire({
+            icon: "warning",
+            title: "Poor Internet Connection",
+            text: "Your connection is slow. Some features may not work properly.",
+            toast: true,
+            timer: 4000,
+            position: "top-end",
+            showConfirmButton: false,
+          });
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection) {
+      connection.addEventListener("change", checkPoorConnection);
+      checkPoorConnection(); // Check initially on mount
+    }
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      if (connection) {
+        connection.removeEventListener("change", checkPoorConnection);
+      }
+    };
+  }, []);
+  
 
   useEffect(() => {
     let countdown;
@@ -27,6 +96,18 @@ const OTPVerification = () => {
     return () => clearInterval(countdown);
   }, [timer]);
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+  const updateMode = (newMode) => {
+    navigate(location.pathname, {
+      state: { ...location.state, bt: newMode },
+      replace: true // prevents pushing a new history entry
+    });
+    setbuttonName('Resend Otp');
+  };
   const handleChange = (index, e) => {
     const value = e.target.value;
     if (!/^\d?$/.test(value)) return; // Allow only numbers
@@ -47,79 +128,203 @@ const OTPVerification = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCountdown = async () => {
+     
+      if  (bt ==="" ){
+        setbuttonName("Send Otp");
+      }
+      try {
+        const response = await axios.post(
+          `${apiUrl}/check_count_code_expirtation`,
+          { email },
+          {
+            headers: {
+             [headerName]:apiKey,
+            },
+          }
+        );
+
+        setTimer(response.data.countdown);
+        setCanResend(response.data.countdown <= 0);
+      } catch (error) {
+       
+       setTimer(0);
+      }
+    };
+
+    fetchCountdown();
+  }, [email]);
+
+  
   const handleResend = async () => {
+       if (!navigator.onLine) {
+          Swal.fire({
+            icon: 'error',
+            title: 'No Internet',
+            text: 'You are currently offline. Please check your connection.',
+            toast: true,
+            timer: 3000,
+            position: 'top-end',
+            showConfirmButton: false,
+          });
+          return;
+        }
     try {
       Swal.fire({
         title: 'Sending OTP...',
         text: 'Please wait while we send a new OTP to your email.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-green-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+        
+        },
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
         }
       });
-
-      const newCode = Math.floor(100000 + Math.random() * 900000); // Generate a new 6-digit code
-      await axios.put("http://localhost:3000/user/update_code", { email, code: newCode });
+      await axios.put(`${apiUrl}/update_code`, { email,mode },{
+        headers:{
+  [headerName]:apiKey,
+          }
+      });
       setOtp(["", "", "", "", "", ""]);
-      setTimer(60);
+      setTimer(180);
       setCanResend(false);
-      setCode(newCode); // Update state with new code
       Swal.fire({
         icon: 'success',
         title: 'OTP Resent',
         text: 'A new OTP has been sent to your email.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-green-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+        }
       });
+      updateMode("none");
     } catch (error) {
       console.error("Error resending OTP:", error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'Failed to resend OTP. Please try again later.',
+        showConfirmButton:true,
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-red-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+          confirmButton: 'mt-4 bg-red-600 text-white text-sm sm:text-base px-4 py-2 rounded hover:bg-red-600 focus:outline-none'
+        }
       });
     }
   };
 
   const handleVerify = async () => {
     const enteredOtp = otp.join("");
-    if ( (enteredOtp === String(code)) || (enteredOtp === String(code1))  ) {
-      try {
-        Swal.fire({
-          title: 'Verifying OTP...',
-          text: 'Please wait while we verify your OTP.',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
+       if (!navigator.onLine) {
+          Swal.fire({
+            icon: 'error',
+            title: 'No Internet',
+            text: 'You are currently offline. Please check your connection.',
+            toast: true,
+            timer: 3000,
+            position: 'top-end',
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+    if (enteredOtp.length !== 6) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Incomplete OTP',
+        text: 'Please enter the full OTP.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-re-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+          confirmButton: 'mt-4 bg-red-500 text-white text-sm sm:text-base px-4 py-2 rounded hover:bg-red-600 focus:outline-none'
+        }
+      });
+    }
+
+  
+  
+    try {
+      Swal.fire({
+        title: 'Verifying OTP...',
+        text: 'Please wait while we verify your OTP.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-green-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+        },
+        allowOutsideClick: false,
+        
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      const response =  await axios.post(`${apiUrl}/verify_account`, {
+          email,
+          code:parseInt(enteredOtp)
+        }, {
+          headers: {
+          [headerName]:apiKey,
           }
         });
-
-        const response = await axios.put("http://localhost:3000/user/update_verification", { email, verified: true });
-        console.log("Verification successful:", response.data);
-        Swal.fire({
-          icon: 'success',
-          title: 'Verification Successful',
-          text: 'Your email has been verified successfully.',
-        });
-         if(mode === "forgotpassword"){
-          navigate("/resetpassword", { state: { email: email}});
-         }else{
-          navigate("/");
-         }
-      } catch (error) {
-        console.error("Error verifying OTP:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Verification Failed',
-          text: 'Failed to verify OTP. Please try again.',
-        });
+  
+      Swal.close(); // close loading
+      updateMode("");
+  
+     
+  
+      if (mode === "forgot_password") {
+        navigate("/resetpassword", { state: { email } });
+      } else {
+         await Swal.fire({
+        icon: 'success',
+        title: 'Verification Successful',
+        text: 'Your email has been verified successfully.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-green-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+          confirmButton: 'mt-4 bg-green-600 text-white text-sm sm:text-base px-4 py-2 rounded hover:bg-green-600 focus:outline-none'
+        }
+      });
+        navigate("/");
       }
-    } else {
+    } catch (error) {
+      Swal.close(); // close loading if it fails
+    
       Swal.fire({
         icon: 'error',
         title: 'Verification Failed',
-        text: 'Failed to verify OTP. Please try again.',
+        text: error.response?.data?.message || 'Failed to verify OTP. Please try again.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          title: 'text-lg sm:text-xl font-semibold text-red-600',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+          confirmButton: 'mt-4 bg-red-500 text-white text-sm sm:text-base px-4 py-2 rounded hover:bg-red-600 focus:outline-none'
+        }
       });
+    }    
+  };
+  const handlePaste = (e) => {
+    const paste = e.clipboardData.getData("text").trim();
+    if (/^\d{6}$/.test(paste)) {
+      const newOtp = paste.split("");
+      setOtp(newOtp);
+      // Focus the last input
+      inputRefs.current[5]?.focus();
     }
   };
+  
+  
 
   const isOtpFilled = otp.every((digit) => digit !== "");
 
@@ -131,16 +336,18 @@ const OTPVerification = () => {
 
         <div className="flex justify-center space-x-2 mb-4">
           {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(el) => (inputRefs.current[index] = el)}
-              type="text"
-              maxLength="1"
-              value={digit}
-              onChange={(e) => handleChange(index, e)}
-              onKeyDown={(e) => handleBackspace(index, e)}
-              className="w-12 h-12 text-center text-xl border-2 border-gray-300 rounded focus:outline-none focus:border-yellow-500"
-            />
+        <input
+        key={index}
+        ref={(el) => (inputRefs.current[index] = el)}
+        type="text"
+        maxLength="1"
+        value={digit}
+        onChange={(e) => handleChange(index, e)}
+        onKeyDown={(e) => handleBackspace(index, e)}
+        onPaste={(e) => handlePaste(e)}
+        className="w-12 h-12 text-center text-xl border-2 border-gray-300 rounded focus:outline-none focus:border-yellow-500"
+      />
+      
           ))}
         </div>
 
@@ -155,12 +362,16 @@ const OTPVerification = () => {
         </button>
 
         <div className="mt-4 text-gray-600">
+
+     
+
+
           {canResend ? (
             <button className="text-green-500 font-semibold" onClick={handleResend}>
-              Resend OTP
+              {buttonName}
             </button>
           ) : (
-            <p>Resend OTP in {timer}s</p>
+            <p>Resend OTP in {formatTime(timer)}</p>
           )}
         </div>
       </div>

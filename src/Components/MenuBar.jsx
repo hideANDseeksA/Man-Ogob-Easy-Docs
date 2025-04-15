@@ -27,16 +27,20 @@ if (!user) {
         className="flex flex-col w-[85%] h-auto py-3 gap-3 md:justify-between 
         md:py-3 md:w-[95%] md:flex-row md:px-5 rounded-[18px] border items-center"
       >
-        {/* Profile Section */}
-        <div className="md:flex md:flex-row gap-3 md:gap-5 flex flex-col justify-center items-center">
-          <img className="h-[80px] w-auto" src="./images/logo.png" alt="logo" />
-          <div className="flex flex-col justify-center items-center md:place-items-start">
-            <h2 className="font-semibold">  Hello,  {user.first_name}</h2>
-            <p>{user.email}</p>
+     
+          <div className="md:flex md:flex-row gap-3 md:gap-5 flex flex-col justify-center items-center">
+            <img
+              className="h-[80px] w-auto"
+              src={user.sex === "M" ? "./images/man.png" : "./images/woman.png"}
+              alt="logo"
+            />
+            <div className="flex flex-col justify-center items-center md:place-items-start">
+              <h2 className="font-semibold">  Hello,  {user.first_name}</h2>
+              <p>{user.email}</p>
+            </div>
           </div>
-        </div>
 
-        {/* Navigation Menu */}
+          {/* Navigation Menu */}
         <div className="w-[80%] md:w-[75%] relative">
           <ul className="flex flex-col gap-1 justify-center text-center md:flex-row relative">
             {menuItems.map((item) => (
@@ -62,7 +66,9 @@ if (!user) {
               </Link>
             ))}
           </ul>
+          
         </div>
+     
       </div>
     </div>
   );

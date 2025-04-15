@@ -8,9 +8,12 @@ import axios from "axios";
 const Transaction = () => {
   const [isOpen, setIsOpen] = useState({});
   const [transactions, setTransactions] = useState([]);
-    const location = useLocation();
-    const user = location.state?.user || JSON.parse(localStorage.getItem("userData"));
+  const location = useLocation();
+  const user = location.state?.user || JSON.parse(localStorage.getItem("userData"));
   const resident_id = user.resident_id;
+  const api = import.meta.env.VITE_GLOBAL_API;
+  const headerName = import.meta.env.VITE_HEADER_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
   useEffect(() => {
     fetchTransactionHistory(resident_id);
   }, [resident_id]);
@@ -19,6 +22,10 @@ const Transaction = () => {
     Swal.fire({
       title: 'Loading...',
       text: 'Fetching transaction history, please wait.',
+      customClass: {
+        popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+        htmlContainer: 'text-sm sm:text-base text-gray-700',
+      },
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -26,22 +33,24 @@ const Transaction = () => {
     });
 
     try {
-      const response = await axios.get(`https://bned-backend.onrender.com/certificate_transaction_history/${resident_id}`);
+      const response = await axios.get(`${api}/api/transaction/history_residents/${resident_id}`, {
+        headers: {
+          [headerName]: apiKey
+        }
+      });
       if (response.status === 200) {
         setTransactions(response.data);
         Swal.close();
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to fetch transaction history. Please try again later.',
-        });
-      }
+      } 
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'Failed to fetch transaction history. Please try again later.',
+        customClass: {
+          popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+          htmlContainer: 'text-sm sm:text-base text-gray-700',
+        }
       });
     } finally {
       Swal.close();
@@ -69,7 +78,7 @@ const Transaction = () => {
       {Object.keys(groupedTransactions).map((type) => (
         <div key={type} className="mb-8">
           {/* Dropdown Toggle */}
-          <div 
+          <div
             className="flex items-center justify-between cursor-pointer p-4 bg-gray-100 rounded-md"
             onClick={() => toggleDropdown(type)}
           >
@@ -84,15 +93,15 @@ const Transaction = () => {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className={`overflow-hidden bg-white rounded-lg ${!isOpen[type] ? "hidden" : "block"} mt-3`}
           >
-            <div className="overflow-x-auto w-full">
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto scrollbar-hide">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
-                  <tr className="bg-[#7DCB80]">
+                  <tr className="bg-[#7DCB80] text-white text-sm uppercase sticky top-0">
                     <th className="border p-3">Request #</th>
                     <th className="border p-3">Requested Document</th>
                     <th className="border p-3">Date Requested</th>
                     <th className="border p-3">Status</th>
-                    <th className="border p-3">Pick-up Schedule</th>
+                    <th className="border p-3">Date Issued</th>
                     <th className="border p-3">Remarks</th>
                   </tr>
                 </thead>
@@ -103,7 +112,7 @@ const Transaction = () => {
                       <td className="border p-3">{transaction.certificate_type}</td>
                       <td className="border p-3">{new Date(transaction.date_requested).toLocaleDateString()}</td>
                       <td className="border p-3">{transaction.status}</td>
-                      <td className="border p-3">{transaction.date_issued ? new Date(transaction.date_issued).toLocaleDateString() : "To be scheduled"}</td>
+                      <td className="border p-3">{transaction.date_issued ? new Date(transaction.date_issued).toLocaleDateString() : "Not Available"}</td>
                       <td className="border p-3">{transaction.certificate_details.purpose}</td>
                     </tr>
                   ))}

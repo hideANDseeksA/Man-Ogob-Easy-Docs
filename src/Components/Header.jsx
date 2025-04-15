@@ -26,7 +26,7 @@ const Header = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         navigate("/", { replace: true });
-        
+        localStorage.removeItem('authToken');
         setTimeout(() => {
           window.history.pushState(null, null, window.location.href);
           window.onpopstate = () => {
