@@ -14,7 +14,7 @@ const SignUpPage = () => {
   const headerName = import.meta.env.VITE_HEADER_URL;
   const apiKey = import.meta.env.VITE_API_KEY;
   const emailpattern = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
-  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   const idPattern = /^\d{4}-\d{4}-\d{4,}$/;
   const [formData, setFormData] = useState({
     user_id: '',
@@ -132,7 +132,7 @@ const SignUpPage = () => {
     }
 
     if (!passwordPattern.test(formData.password && formData.confirmPassword)) {
-      Swal.fire({ icon: 'error', title: 'Error', text: 'Passwords too short atleast 8 character',  customClass: {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Passwords must be at least 8 characters long and include a letter, number, and special character.',  customClass: {
         popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
         title: 'text-lg sm:text-xl font-semibold text-red-600',
         htmlContainer: 'text-sm sm:text-base text-gray-700',

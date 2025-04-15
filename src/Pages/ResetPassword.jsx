@@ -13,7 +13,7 @@ const ResetPassword = () => {
   const headerName = import.meta.env.VITE_HEADER_URL;
   const apiKey = import.meta.env.VITE_API_KEY;
   const email = location.state?.email;
-  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   useEffect(() => {
     const handleOnline = () => {
