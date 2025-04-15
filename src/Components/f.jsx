@@ -91,7 +91,7 @@ const Footer = () => {
         </div>
 
         <div className="text-center py-3 bg-[#376a63] text-sm text-white">
-          © 2020 Copyright
+          © 2025 Copyright
         </div>
       </footer>
     </div>

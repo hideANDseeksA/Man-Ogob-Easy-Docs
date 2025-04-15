@@ -8,6 +8,9 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate(); // Hook for navigation
 
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const headerName = import.meta.env.VITE_HEADER_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
   if (!isOpen) return null;
 
   const handleResetPassword = async () => {
@@ -26,9 +29,11 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
     setLoading(true); // Start loading
 
     try {
-      const response = await fetch("https://bned-backend.onrender.com/api/check-email", {
+      const response = await fetch(`${apiUrl}/check-email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+           [headerName]:apiKey },
         body: JSON.stringify({ email }),
       });
 

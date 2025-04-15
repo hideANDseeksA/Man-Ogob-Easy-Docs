@@ -22,6 +22,12 @@ const Header = () => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
+      customClass: {
+        popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+        title: 'text-lg sm:text-xl font-semibold text-red-600',
+        htmlContainer: 'text-sm sm:text-base text-gray-700',
+       
+      },
       confirmButtonText: "Yes, sign out!",
     }).then((result) => {
       if (result.isConfirmed) {

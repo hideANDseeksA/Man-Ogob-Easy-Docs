@@ -117,7 +117,7 @@ You agree to keep your account information up to date and notify us immediately 
                             title='12. Contact Us'
                             content='If you have any questions about these Terms or the Service, please contact us at:
 Email: easydocs@gmail.com
-Address: idk this one 
+Address: Barangay Alawihao Daet,Camarines Norte
 Phone: 09090909014
 '
                         />
@@ -125,17 +125,17 @@ Phone: 09090909014
 
                 </div>
                 <div className='w-[80%] md:w-[70%]  justify-center fixed bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-10'>
-        <button 
-        onClick={handleDecline}
-        className='px-6 py-2 bg-white border border-black rounded-[5px] hover:bg-gray-100'>
-          Decline
-        </button>
-        <button
-        onClick={handleAccept}
-        className='px-6 py-2 bg-[#376a63] text-white rounded-[5px] hover:bg-[#2a524d]'>
-          Accept
-        </button>
-      </div>
+                    <button
+                        onClick={handleDecline}
+                        className='px-6 py-2 bg-white border border-black rounded-[5px] hover:bg-gray-100'>
+                        Decline
+                    </button>
+                    <button
+                        onClick={handleAccept}
+                        className='px-6 py-2 bg-[#376a63] text-white rounded-[5px] hover:bg-[#2a524d]'>
+                        Accept
+                    </button>
+                </div>
             </div>
 
         </div>

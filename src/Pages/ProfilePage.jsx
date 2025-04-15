@@ -185,6 +185,11 @@ const ProfilePage = () => {
       text: "You want to cancel this transaction?",
       icon: 'warning',
       showCancelButton: true,
+      customClass: {
+        popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+        title: 'text-lg sm:text-xl font-semibold text-red-600',
+        htmlContainer: 'text-sm sm:text-base text-gray-700',
+      },
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Yes, cancel it!'
@@ -193,6 +198,10 @@ const ProfilePage = () => {
         Swal.fire({
           title: 'Cancelling...',
           text: 'Please wait while we cancel your transaction.',
+          customClass: {
+            popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+            htmlContainer: 'text-sm sm:text-base text-gray-700',
+          },
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading();
@@ -214,7 +223,14 @@ const ProfilePage = () => {
             prev.filter(transaction => transaction.transaction_id !== transaction_id)
           );
   
-          Swal.fire('Cancelled!', 'Your transaction has been cancelled.', 'success');
+          Swal.fire({
+            title:'Cancelled!', 
+            text:'Your transaction has been cancelled.',
+            icon: 'success',
+            customClass: {
+              popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
+              htmlContainer: 'text-sm sm:text-base text-gray-700',
+            }});
         } catch (error) {
           Swal.fire('Error!', 'Failed to cancel the transaction.', 'error');
         }
@@ -254,17 +270,18 @@ const ProfilePage = () => {
                   certification requests and other essential services. Kindly take note of the following details:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li><strong>Processing Schedule:</strong> Monday to Friday, 8:00 AM - 4:00 PM</li>
+                  <li><strong>Processing Schedule:</strong> Monday to Friday, 7:00 AM - 5:00 PM</li>
                   <li><strong>Location:</strong> Barangay Hall, Alawihao</li>
                   <li>
                     <strong>Required Documents:</strong> A valid government-issued ID, a duly accomplished application form,
                     and any necessary supporting documents.
                   </li>
                   <li>
-                    <strong>For Inquiries:</strong> Contact us at (123) 456-7890 or email us at
-                    <a href=" mailto:  info@barangayalawihao.gov.ph" className="underline text-blue-600 hover:text-blue-800">
-                      info@barangayalawihao.gov.ph
-                    </a>.
+                  <strong>For Inquiries:</strong> Contact us at (123) 456-7890 or email us at{' '}
+<a href="mailto:info@barangayalawihao.gov.ph" className="underline text-blue-600 hover:text-blue-800">
+  info@barangayalawihao.gov.ph
+</a>.
+
                   </li>
                 </ul>
                 <p className="mt-5 text-gray-900 font-semibold">Barangay Alawihao, 2025</p>
