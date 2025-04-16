@@ -6,6 +6,7 @@ import TermsAndCondition from '../Components/TermsAndCondition';
 import logo2 from '../image/sign-up-animate.svg';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
+
 const SignUpPage = () => {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
