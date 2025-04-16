@@ -4,17 +4,22 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import TermsAndCondition from '../Components/TermsAndCondition';
 import logo2 from '../image/sign-up-animate.svg';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const SignUpPage = () => {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const togglePassword = () => setShowPassword(!showPassword);
+  const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_API_URL;
   const headerName = import.meta.env.VITE_HEADER_URL;
   const apiKey = import.meta.env.VITE_API_KEY;
   const emailpattern = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
-  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W_]{8,}$/;
   const idPattern = /^\d{4}-\d{4}-\d{4,}$/;
   const [formData, setFormData] = useState({
     user_id: '',
@@ -196,31 +201,70 @@ const SignUpPage = () => {
   };
 
   return (
-<div className='flex flex-col md:flex-row w-full items-center p-4 md:h-screen md:justify-center pt-10 md:pt-0'>
-
+    <div className='flex flex-col md:flex-row w-full items-center p-4 md:h-screen md:justify-center pt-10 md:pt-0'>
       <div className='hidden md:block md:w-1/2'>
         <img src={logo2} alt='Sign Up Illustration' className='w-full h-auto' />
       </div>
+
       <div className='w-full md:w-1/2 flex flex-col items-center'>
         <h3 className='text-2xl font-extrabold mt-5'>Hey there! 👋</h3>
         <p className='font-semibold text-center'>Join us today and get your certificate with ease!</p>
+
         <form onSubmit={handleSignUp} className='space-y-4 w-full max-w-md mt-5 p-5 bg-white rounded-lg shadow-lg'>
           <div>
             <label className='block font-semibold'>Resident ID</label>
-            <input type='text' name='user_id' placeholder='2025-4609-0000' value={formData.user_id} onChange={handleChange} className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500' required />
+            <input type='text' name='user_id' placeholder='Enter your Resident ID' value={formData.user_id} onChange={handleChange} className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500' required />
           </div>
+
           <div>
             <label className='block font-semibold'>Email</label>
             <input type='email' name='email' placeholder='sample@email.com' value={formData.email} onChange={handleChange} className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500' required />
           </div>
+
           <div>
             <label className='block font-semibold'>Password</label>
-            <input type='password' name='password' placeholder='********' value={formData.password} onChange={handleChange} className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500' required />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name='password'
+                placeholder='********'
+                value={formData.password}
+                onChange={handleChange}
+                className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500'
+                required
+              />
+              <button
+                type="button"
+                onClick={togglePassword}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </button>
+            </div>
           </div>
+
           <div>
             <label className='block font-semibold'>Confirm Password</label>
-            <input type='password' name='confirmPassword' placeholder='********' value={formData.confirmPassword} onChange={handleChange} className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500' required />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name='confirmPassword'
+                placeholder='********'
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className='w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500'
+                required
+              />
+              <button
+                type="button"
+                onClick={toggleConfirmPassword}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500"
+              >
+                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+              </button>
+            </div>
           </div>
+
           <div className='flex flex-col items-center space-y-2'>
             <div className='flex items-center space-x-2'>
               <input type='checkbox' id='terms' checked={isChecked} onChange={() => setIsChecked(!isChecked)} />
@@ -230,16 +274,26 @@ const SignUpPage = () => {
               </label>
             </div>
           </div>
-          <button type='submit' className={`w-full py-2 rounded-lg text-white font-bold ${!isChecked ? 'bg-gray-400 cursor-not-allowed' : 'bg-black'}`} disabled={!isChecked}>SIGN UP</button>
+
+          <button
+            type='submit'
+            className={`w-full py-2 rounded-lg text-white font-bold ${!isChecked ? 'bg-gray-400 cursor-not-allowed' : 'bg-black'}`}
+            disabled={!isChecked}
+          >
+            SIGN UP
+          </button>
+
           <div className='text-center'>
             <p>Already have an account? <Link to='/' className='font-bold text-blue-500'>Sign in</Link></p>
           </div>
         </form>
       </div>
+
       <TermsAndCondition isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} onAccept={handleTermsAccept} />
     </div>
-);
-
+  );
 };
+
+
 
 export default SignUpPage;
