@@ -119,8 +119,9 @@ const ProfilePage = () => {
     });
 
     socket.on('new_transaction', (newTransaction) => {
-      setTransactions(prev => [newTransaction, ...prev]);
-
+      if (newTransaction.resident_id === residentId) {
+    setTransactions(prev => [newTransaction, ...prev]);
+  }
     });
 
     socket.on('remove_transaction', ({ transaction_id }) => {
