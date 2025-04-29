@@ -98,65 +98,73 @@ const ProfilePage = () => {
   };
 
 
-  useEffect(() => {
-    const socket = io(api, {
-      extraHeaders: {
-     [headerName]:apiKey
-      }
-    });
-    let isUnmounting = false; // 🔸 Add this flag
+useEffect(() => {
+  const socket = io(api, {
+    extraHeaders: {
+      [headerName]: apiKey,
+    },
+  });
 
-    // Emit the resident ID to get their transactions
-    if (residentId) {
-      socket.emit("getTransactionsByResident", residentId);
-    }
+  let isUnmounting = false;
 
-    // Listen for response
-    socket.on('transactions', (data) => {
-      setTransactions(data);
-      setLoading(false);
+  if (residentId) {
+    // 🔐 Register as resident to join correct room
+    socket.emit("register", { role: "resident", residentId: String(residentId) });
 
-    });
-
-    socket.on('new_transaction', (newTransaction) => {
-      if (newTransaction.resident_id === residentId) {
-    setTransactions(prev => [newTransaction, ...prev]);
+    // Request only this resident's transactions
+    socket.emit("getTransactionsByResident", residentId);
   }
-    });
 
-    socket.on('remove_transaction', ({ transaction_id }) => {
-      setTransactions(prev => prev.filter(req => req.transaction_id !== transaction_id));
+  // 📥 Initial transaction list
+  socket.on("transactions", (data) => {
+    setTransactions(data);
+    setLoading(false);
+  });
 
-    });
+  // 🆕 New transaction for this resident only
+  socket.on("new_transaction", (newTransaction) => {
+    if (String(newTransaction.resident_id) === String(residentId)) {
+      setTransactions((prev) => [newTransaction, ...prev]);
+    }
+  });
 
-    socket.on("transaction_updated", ({ transaction_id, status }) => {
-      setTransactions(prev =>
-        prev.map(req =>
-          req.transaction_id === transaction_id ? { ...req, status } : req
-        )
-      );
-    });
-    socket.on('disconnect', () => {
-      if (!isUnmounting) { // 🔸 Only show alert if not unmounting
-        Swal.close();
-        Swal.fire({
-          icon: "error",
-          title: "No Internet Connection",
-          text: "Please check your network connection.",
-          toast: true,
-          timer: 3000,
-          position: "top-end",
-          showConfirmButton: false,
-        });
-      }
-    });
-  
+  // 🗑️ Transaction removed
+  socket.on("remove_transaction", ({ transaction_id }) => {
+    setTransactions((prev) => prev.filter((req) => req.transaction_id !== transaction_id));
+  });
 
-    return () => {
-      isUnmounting = true; // 🔸 Set before disconnecting
-      socket.disconnect();
-    };
-  }, [residentId]); // Make sure this runs again when residentId changes
+  // 🔄 Transaction updated
+  socket.on("transaction_updated", ({ transaction_id, status }) => {
+    setTransactions((prev) =>
+      prev.map((req) =>
+        req.transaction_id === transaction_id ? { ...req, status } : req
+      )
+    );
+  });
+
+  // ⚠️ Connection lost
+  socket.on("disconnect", () => {
+    if (!isUnmounting) {
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "No Internet Connection",
+        text: "Please check your network connection.",
+        toast: true,
+        timer: 3000,
+        position: "top-end",
+        showConfirmButton: false,
+      });
+    }
+  });
+
+  // 🧹 Cleanup on unmount
+  return () => {
+    isUnmounting = true;
+    socket.disconnect();
+  };
+}, [residentId]);
+
 
 
 
