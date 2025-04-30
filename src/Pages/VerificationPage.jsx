@@ -209,7 +209,7 @@ const OTPVerification = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Failed to resend OTP. Please try again later.',
+        text: error.response?.data?.message || 'Failed to resend OTP. Please try again later',
         showConfirmButton:true,
         customClass: {
           popup: 'w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-6 rounded-2xl shadow-xl',
