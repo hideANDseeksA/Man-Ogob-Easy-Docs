@@ -19,14 +19,10 @@ const Footer = () => {
     socket.emit("getStatus");
 
     // Listen for response
-    socket.on("Barangay Hall", (data) => {
-      if (data?.error) {
-        setStatus("Error fetching status");
-        console.error("Socket error:", data.details);
-      } else {
-        setStatus(data || 'Unavailable');
-      }
-    });
+   socket.on("Barangay Hall", (status) => {
+  setStatus(status || 'Unavailable');
+});
+
 
     socket.on("status_updated", (data) => {
       setStatus(data.status);
