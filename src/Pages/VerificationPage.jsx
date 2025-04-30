@@ -314,15 +314,37 @@ const OTPVerification = () => {
       });
     }    
   };
-  const handlePaste = (e) => {
-    const paste = e.clipboardData.getData("text").trim();
-    if (/^\d{6}$/.test(paste)) {
-      const newOtp = paste.split("");
-      setOtp(newOtp);
-      // Focus the last input
-      inputRefs.current[5]?.focus();
-    }
-  };
+const handlePaste = (e) => {
+  const paste = e.clipboardData?.getData("text").trim();
+  if (/^\d{6}$/.test(paste)) {
+    const newOtp = paste.split("");
+    setOtp(newOtp);
+    // Focus the last input
+    inputRefs.current[5]?.focus();
+  }
+};
+
+const handleInput = (index, e) => {
+  const value = e.target.value.trim();
+  // Handle pasting for mobile (if paste event is not triggered)
+  if (/^\d{6}$/.test(value)) {
+    const newOtp = value.split("");
+    setOtp(newOtp);
+    inputRefs.current[5]?.focus();
+    return;
+  }
+
+  // Handle regular single-digit input
+  if (!/^\d?$/.test(value)) return; // Allow only numbers
+  const newOtp = [...otp];
+  newOtp[index] = value;
+  setOtp(newOtp);
+
+  // Move to the next input if a number is entered
+  if (value && index < 5) {
+    inputRefs.current[index + 1].focus();
+  }
+};
   
   
 
@@ -336,17 +358,18 @@ const OTPVerification = () => {
 
         <div className="flex justify-center space-x-2 mb-4">
           {otp.map((digit, index) => (
-        <input
-        key={index}
-        ref={(el) => (inputRefs.current[index] = el)}
-        type="text"
-        maxLength="1"
-        value={digit}
-        onChange={(e) => handleChange(index, e)}
-        onKeyDown={(e) => handleBackspace(index, e)}
-        onPaste={(e) => handlePaste(e)}
-        className="w-12 h-12 text-center text-xl border-2 border-gray-300 rounded focus:outline-none focus:border-yellow-500"
-      />
+     <input
+  key={index}
+  ref={(el) => (inputRefs.current[index] = el)}
+  type="text"
+  maxLength="1"
+  value={digit}
+  onChange={(e) => handleChange(index, e)}
+  onKeyDown={(e) => handleBackspace(index, e)}
+  onPaste={(e) => handlePaste(e)}
+  onInput={(e) => handleInput(index, e)} // Added onInput for mobile paste detection
+  className="w-12 h-12 text-center text-xl border-2 border-gray-300 rounded focus:outline-none focus:border-yellow-500"
+/>
       
           ))}
         </div>
